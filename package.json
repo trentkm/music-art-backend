@@ -1,0 +1,33 @@
+{
+  "name": "music-art-backend",
+  "version": "1.0.0",
+  "description": "Serverless backend for generating blended album artwork using Spotify data and OpenAI.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "deploy": "cdk deploy",
+    "synth": "cdk synth",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.701.0",
+    "aws-cdk-lib": "^2.152.0",
+    "axios": "^1.6.8",
+    "constructs": "^10.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "openai": "^4.56.0",
+    "sharp": "^0.34.5",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.30",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

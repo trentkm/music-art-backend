@@ -1,0 +1,14 @@
+# Node/TypeScript
+node_modules
+dist
+*.tsbuildinfo
+
+# AWS CDK
+cdk.out
+
+# Env/secrets
+.env
+
+# OS
+.DS_Store
+Thumbs.db
