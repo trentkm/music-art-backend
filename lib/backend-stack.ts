@@ -120,11 +120,13 @@ export class BackendStack extends Stack {
 
     const authExchange = authResource.addResource('exchange');
     authExchange.addMethod('POST', new LambdaIntegration(authCallbackFn));
-    authExchange.addCorsPreflight({
-      allowOrigins: frontendOrigin === '*' ? Cors.ALL_ORIGINS : [frontendOrigin],
-      allowMethods: ['OPTIONS', 'POST'],
-      allowHeaders: ['Content-Type', 'Authorization']
-    });
+    if (!authExchange.node.tryFindChild('OPTIONS')) {
+      authExchange.addCorsPreflight({
+        allowOrigins: frontendOrigin === '*' ? Cors.ALL_ORIGINS : [frontendOrigin],
+        allowMethods: ['OPTIONS', 'POST'],
+        allowHeaders: ['Content-Type', 'Authorization']
+      });
+    }
 
     const spotifyResource = api.root.addResource('spotify');
     spotifyResource.addResource('top-art').addMethod('GET', new LambdaIntegration(topArtFn));
