@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install CDK CLI
+        run: npm install -g aws-cdk
+
       - name: Build Sharp layer
         if: ${{ env.SHARP_LAYER_ARN == '' }}
         run: |
