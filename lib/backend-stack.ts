@@ -105,6 +105,7 @@ export class BackendStack extends Stack {
     const authResource = api.root.addResource('auth');
     authResource.addResource('login').addMethod('GET', new LambdaIntegration(authLoginFn));
     authResource.addResource('callback').addMethod('GET', new LambdaIntegration(authCallbackFn));
+    authResource.addResource('exchange').addMethod('POST', new LambdaIntegration(authCallbackFn));
 
     const spotifyResource = api.root.addResource('spotify');
     spotifyResource.addResource('top-art').addMethod('GET', new LambdaIntegration(topArtFn));

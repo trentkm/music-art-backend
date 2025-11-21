@@ -5,8 +5,16 @@ import { AuthTokenPayload } from '../utils/types';
 
 export const handler = async (event: any) => {
   try {
-    const code = event.queryStringParameters?.code;
-    const error = event.queryStringParameters?.error;
+    let body: Record<string, any> = {};
+    if (event.body) {
+      try {
+        body = JSON.parse(event.body);
+      } catch (parseErr) {
+        console.warn('auth-callback invalid JSON body', parseErr);
+      }
+    }
+    const code = event.queryStringParameters?.code || body.code;
+    const error = event.queryStringParameters?.error || body.error;
 
     if (error) {
       return errorResponse(`Spotify auth error: ${error}`, 400);
