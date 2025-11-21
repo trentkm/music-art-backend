@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { URL } from 'url';
 import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -11,7 +12,18 @@ export class BackendStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const frontendOrigin = process.env.FRONTEND_URL || '*';
+    const resolveOrigin = (value?: string) => {
+      if (!value) return '*';
+      if (value === '*') return '*';
+      try {
+        const url = new URL(value);
+        return `${url.protocol}//${url.host}`;
+      } catch {
+        return value;
+      }
+    };
+
+    const frontendOrigin = resolveOrigin(process.env.FRONTEND_URL);
 
     const bucket = new Bucket(this, 'GeneratedImagesBucket', {
       publicReadAccess: true,
@@ -105,7 +117,14 @@ export class BackendStack extends Stack {
     const authResource = api.root.addResource('auth');
     authResource.addResource('login').addMethod('GET', new LambdaIntegration(authLoginFn));
     authResource.addResource('callback').addMethod('GET', new LambdaIntegration(authCallbackFn));
-    authResource.addResource('exchange').addMethod('POST', new LambdaIntegration(authCallbackFn));
+
+    const authExchange = authResource.addResource('exchange');
+    authExchange.addMethod('POST', new LambdaIntegration(authCallbackFn));
+    authExchange.addCorsPreflight({
+      allowOrigins: frontendOrigin === '*' ? Cors.ALL_ORIGINS : [frontendOrigin],
+      allowMethods: ['OPTIONS', 'POST'],
+      allowHeaders: ['Content-Type', 'Authorization']
+    });
 
     const spotifyResource = api.root.addResource('spotify');
     spotifyResource.addResource('top-art').addMethod('GET', new LambdaIntegration(topArtFn));
