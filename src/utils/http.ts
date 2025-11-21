@@ -1,7 +1,18 @@
 import { LambdaResponse } from './types';
 
+const allowedOrigin = () => {
+  const configured = process.env.FRONTEND_URL;
+  if (!configured) return '*';
+  try {
+    const url = new URL(configured);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return configured;
+  }
+};
+
 const defaultHeaders = () => ({
-  'Access-Control-Allow-Origin': process.env.FRONTEND_URL || '*',
+  'Access-Control-Allow-Origin': allowedOrigin(),
   'Access-Control-Allow-Headers': 'Content-Type,Authorization',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Credentials': 'true'
