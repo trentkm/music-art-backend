@@ -5,7 +5,7 @@ dist
 
 # AWS CDK
 cdk.out
-
+build/
 # Env/secrets
 .env
 
