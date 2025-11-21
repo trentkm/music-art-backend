@@ -7,7 +7,18 @@ export const handler = async () => {
     const redirectUri = process.env.CALLBACK_URL;
     const frontendUrl = process.env.FRONTEND_URL;
 
+
+    const missing = [];
+    if (!clientId) missing.push('clientId');
+    if (!redirectUri) missing.push('redirectUri');
+    if (!frontendUrl) missing.push('frontendUrl');
+
+    if (missing.length > 0) {
+      return errorResponse(`Missing Spotify configuration: ${missing.join(', ')}`, 500);
+    }
+
     if (!clientId || !redirectUri || !frontendUrl) {
+      // This check is redundant due to the previous missing check, but added for TypeScript type safety
       return errorResponse('Missing Spotify configuration', 500);
     }
 

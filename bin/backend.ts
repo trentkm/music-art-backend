@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'dotenv/config';
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
