@@ -12,6 +12,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SHARP_LAYER_ARN: ${{ secrets.SHARP_LAYER_ARN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,7 +34,7 @@ jobs:
         run: npm ci
 
       - name: Build Sharp layer
-        if: ${{ !secrets.SHARP_LAYER_ARN }}
+        if: ${{ env.SHARP_LAYER_ARN == '' }}
         run: |
           docker run --rm \
             -v "$PWD"/layers/sharp:/opt \
@@ -46,5 +48,5 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CALLBACK_URL: ${{ secrets.CALLBACK_URL }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
-          SHARP_LAYER_ARN: ${{ secrets.SHARP_LAYER_ARN }}
+          SHARP_LAYER_ARN: ${{ env.SHARP_LAYER_ARN }}
         run: npm run cdk -- deploy MusicArtBackendStack --require-approval never
