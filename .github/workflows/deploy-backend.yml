@@ -1,0 +1,50 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Sharp layer
+        if: ${{ !secrets.SHARP_LAYER_ARN }}
+        run: |
+          docker run --rm \
+            -v "$PWD"/layers/sharp:/opt \
+            public.ecr.aws/lambda/nodejs:18 \
+            bash -lc "cd /opt/nodejs && npm install sharp"
+
+      - name: Deploy CDK stack
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CALLBACK_URL: ${{ secrets.CALLBACK_URL }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          SHARP_LAYER_ARN: ${{ secrets.SHARP_LAYER_ARN }}
+        run: npm run cdk -- deploy MusicArtBackendStack --require-approval never
