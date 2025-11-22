@@ -24,7 +24,7 @@ export const blendImage = async (collagePath: string, prompt?: string): Promise<
     contentType: 'image/png'
   });
 
-  const response = await openaiClient.images.edits({
+  const response = await openaiClient.images.edit({
     model: 'gpt-image-1',
     image: imageFile,
     prompt: prompt || 'Blend these album covers into a single cohesive, modern album artwork.',
@@ -32,10 +32,19 @@ export const blendImage = async (collagePath: string, prompt?: string): Promise<
   });
 
   const base64 = response.data[0]?.b64_json;
-  if (!base64) {
-    throw new Error('OpenAI did not return image data');
+  if (base64) {
+    console.log('blendImage: received edited image bytes (b64)');
+    return Buffer.from(base64, 'base64');
   }
 
-  console.log('blendImage: received edited image bytes');
-  return Buffer.from(base64, 'base64');
+  const url = response.data[0]?.url;
+  if (url) {
+    console.log('blendImage: received image URL, downloading');
+    const res = await fetch(url);
+    const arrayBuf = await res.arrayBuffer();
+    console.log('blendImage: downloaded image bytes', { bytes: arrayBuf.byteLength });
+    return Buffer.from(arrayBuf);
+  }
+
+  throw new Error('OpenAI did not return image data');
 };
