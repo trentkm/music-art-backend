@@ -52,7 +52,10 @@ export const handler = async (event: any) => {
     const url = await uploadImage(blended);
     console.log('generate-image upload complete', { url });
 
-    return jsonResponse({ url });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ url })
+    };
   } catch (err: any) {
     console.error('generate-image error', err?.response?.data || err);
     const status = err?.name === 'JsonWebTokenError' ? 401 : 500;
