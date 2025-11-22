@@ -3,10 +3,12 @@ import { URL } from 'url';
 import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Runtime, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
+import { Runtime, LayerVersion, Code, FunctionUrlAuthType } from 'aws-cdk-lib/aws-lambda';
 import { RestApi, LambdaIntegration, Cors } from 'aws-cdk-lib/aws-apigateway';
 import { Bucket, HttpMethods, BlockPublicAccess, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { HttpMethod } from 'aws-cdk-lib/aws-events';
+import * as cdk from 'aws-cdk-lib';
 
 export class BackendStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -48,10 +50,10 @@ export class BackendStack extends Stack {
       process.env.SHARP_LAYER_ARN && process.env.SHARP_LAYER_ARN.length > 0
         ? LayerVersion.fromLayerVersionArn(this, 'SharpLayerImported', process.env.SHARP_LAYER_ARN)
         : new LayerVersion(this, 'SharpLayer', {
-            code: Code.fromAsset(path.join(__dirname, '../layers/sharp')),
-            compatibleRuntimes: [Runtime.NODEJS_20_X],
-            description: 'Sharp lambda layer'
-          });
+          code: Code.fromAsset(path.join(__dirname, '../layers/sharp')),
+          compatibleRuntimes: [Runtime.NODEJS_20_X],
+          description: 'Sharp lambda layer'
+        });
 
     const envVars = {
       SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || '',
@@ -98,6 +100,15 @@ export class BackendStack extends Stack {
 
     bucket.grantReadWrite(generateImageFn);
 
+    const functionUrl = generateImageFn.addFunctionUrl({
+      authType: FunctionUrlAuthType.NONE,
+      cors: {
+        allowedOrigins: [frontendOrigin],
+        allowedMethods: [HttpMethod.POST],
+        allowedHeaders: ['Content-Type', 'Authorization']
+      }
+    });
+
     const bucketPolicy = new PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [bucket.arnForObjects('*')]
@@ -134,5 +145,9 @@ export class BackendStack extends Stack {
 
     const imageResource = api.root.addResource('image');
     imageResource.addResource('generate').addMethod('POST', new LambdaIntegration(generateImageFn));
+
+    new cdk.CfnOutput(this, 'GenerateImageFunctionUrl', {
+      value: functionUrl.url,
+    });
   }
-}
+} 
