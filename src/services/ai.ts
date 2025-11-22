@@ -1,6 +1,12 @@
 import * as fs from 'fs';
+import { File } from 'node:buffer';
 import OpenAI from 'openai';
 import { toFile } from 'openai/uploads';
+
+// Polyfill File on Node 18 runtimes for OpenAI uploads
+if (typeof (globalThis as any).File === 'undefined') {
+  (globalThis as any).File = File as unknown as typeof File;
+}
 
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
