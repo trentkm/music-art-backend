@@ -25,10 +25,14 @@ export const handler = async (event: any) => {
       return errorResponse('Missing signing secret', 500);
     }
 
-    jwt.verify(bearer, secret) as AuthTokenPayload;
-    console.log('generate-image token verified');
+    const tokenPayload = jwt.verify(bearer, secret) as AuthTokenPayload;
+    console.log('generate-image token verified', {
+      expiresAt: tokenPayload?.expiresAt,
+      hasAccessToken: Boolean(tokenPayload?.accessToken)
+    });
 
     const body: GenerateImageRequest = event.body ? JSON.parse(event.body) : {};
+
     if (!body.imageUrls?.length) {
       console.warn('generate-image missing imageUrls');
       return errorResponse('imageUrls are required', 400);

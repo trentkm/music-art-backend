@@ -11,6 +11,7 @@ export const uploadImage = async (buffer: Buffer): Promise<string> => {
 
   const key = `images/${randomUUID()}.png`;
 
+  console.log('uploadImage: uploading to S3', { bucket, key, bytes: buffer.length });
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket,
@@ -21,5 +22,7 @@ export const uploadImage = async (buffer: Buffer): Promise<string> => {
     })
   );
 
-  return `https://${bucket}.s3.amazonaws.com/${key}`;
+  const url = `https://${bucket}.s3.amazonaws.com/${key}`;
+  console.log('uploadImage: upload complete', { url });
+  return url;
 };
