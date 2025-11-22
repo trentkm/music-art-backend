@@ -12,13 +12,13 @@ export const uploadImage = async (buffer: Buffer): Promise<string> => {
   const key = `images/${randomUUID()}.png`;
 
   console.log('uploadImage: uploading to S3', { bucket, key, bytes: buffer.length });
+
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       Body: buffer,
-      ContentType: 'image/png',
-      ACL: 'public-read'
+      ContentType: 'image/png'
     })
   );
 

@@ -5,7 +5,7 @@ import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
 import { RestApi, LambdaIntegration, Cors } from 'aws-cdk-lib/aws-apigateway';
-import { Bucket, HttpMethods, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
+import { Bucket, HttpMethods, BlockPublicAccess, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export class BackendStack extends Stack {
@@ -27,9 +27,10 @@ export class BackendStack extends Stack {
 
     const bucket = new Bucket(this, 'GeneratedImagesBucket', {
       publicReadAccess: true,
+      objectOwnership: ObjectOwnership.BUCKET_OWNER_ENFORCED,
       blockPublicAccess: new BlockPublicAccess({
-        blockPublicAcls: false,
-        ignorePublicAcls: false,
+        blockPublicAcls: true,
+        ignorePublicAcls: true,
         blockPublicPolicy: false,
         restrictPublicBuckets: false
       }),
