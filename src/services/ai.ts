@@ -14,9 +14,15 @@ export const blendImage = async (collagePath: string, prompt?: string): Promise<
     file: collagePath
   });
 
+  const imageFile = {
+    data: fs.createReadStream(collagePath),
+    name: 'collage.png',
+    type: 'image/png'
+  };
+
   const response = await openaiClient.images.edit({
     model: 'gpt-image-1',
-    image: fs.createReadStream(collagePath),
+    image: imageFile,
     prompt: prompt || 'Blend these album covers into a single cohesive, modern album artwork.',
     size: '1024x1024'
   });
