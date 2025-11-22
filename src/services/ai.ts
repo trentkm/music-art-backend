@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import axios from 'axios';
 import OpenAI from 'openai';
 import { toFile } from 'openai/uploads';
 
@@ -19,20 +18,18 @@ export const blendImage = async (collagePath: string, prompt?: string): Promise<
     contentType: 'image/png'
   });
 
-  const response = await openaiClient.images.edit({
+  const response = await openaiClient.images.edits({
     model: 'gpt-image-1',
     image: imageFile,
     prompt: prompt || 'Blend these album covers into a single cohesive, modern album artwork.',
     size: '1024x1024'
   });
 
-  const url = response.data[0]?.url;
-  if (!url) {
-    throw new Error('OpenAI did not return an image URL');
+  const base64 = response.data[0]?.b64_json;
+  if (!base64) {
+    throw new Error('OpenAI did not return image data');
   }
 
-  console.log('blendImage: received image URL, downloading');
-  const img = await axios.get<ArrayBuffer>(url, { responseType: 'arraybuffer' });
-  console.log('blendImage: downloaded image bytes', { bytes: img.data.byteLength });
-  return Buffer.from(img.data);
+  console.log('blendImage: received edited image bytes');
+  return Buffer.from(base64, 'base64');
 };
