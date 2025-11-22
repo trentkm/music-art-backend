@@ -48,7 +48,7 @@ export class BackendStack extends Stack {
         ? LayerVersion.fromLayerVersionArn(this, 'SharpLayerImported', process.env.SHARP_LAYER_ARN)
         : new LayerVersion(this, 'SharpLayer', {
             code: Code.fromAsset(path.join(__dirname, '../layers/sharp')),
-            compatibleRuntimes: [Runtime.NODEJS_18_X],
+            compatibleRuntimes: [Runtime.NODEJS_20_X],
             description: 'Sharp lambda layer'
           });
 
@@ -62,7 +62,7 @@ export class BackendStack extends Stack {
     };
 
     const commonLambdaProps = {
-      runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_20_X,
       handler: 'handler',
       memorySize: 512,
       timeout: Duration.seconds(15),
@@ -91,7 +91,7 @@ export class BackendStack extends Stack {
       entry: path.join(__dirname, '../src/handlers/generate-image.ts'),
       ...commonLambdaProps,
       memorySize: 1024,
-      timeout: Duration.seconds(30),
+      timeout: Duration.minutes(15),
       layers: [sharpLayer]
     });
 
