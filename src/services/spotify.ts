@@ -30,7 +30,7 @@ export const getAccessToken = async (code: string, redirectUri: string): Promise
   return data;
 };
 
-export const getTopArtists = async (accessToken: string, limit = 5) => {
+export const getTopArtists = async (accessToken: string, limit = 10) => {
   const { data } = await axios.get(`${API_BASE}/me/top/artists`, {
     headers: { Authorization: `Bearer ${accessToken}` },
     params: { limit }
